@@ -4,11 +4,13 @@ import { control, draw_field_control } from './control.ts'
 let robot = new Robot(
     14, // Width
     14, // Height
+    25, // Speed
+    .4  // Track Radius
 );
 
-function update() {
+function update(dt: number) {
     draw_field_control();
-    robot.render();
+    robot.render(dt);
     control(robot);
 }
 
@@ -17,9 +19,10 @@ const fps = 60;
 const frameDuration = 1000 / fps;
 
 function render(timestamp: number) {
-    if (timestamp - lastFrameTime >= frameDuration) {
+    let elaped = timestamp - lastFrameTime 
+    if (elaped >= frameDuration) {
         lastFrameTime = timestamp;
-        update();
+        update(elaped / 1000);
     }
     window.requestAnimationFrame(render);
 }
