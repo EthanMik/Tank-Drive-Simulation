@@ -10,6 +10,11 @@ export function to_in(px: number) { return px * ((canvasWidth_px / scale) / (fie
 export function clamp(value: number, min: number, max: number) { return Math.max(min, Math.min(max, value)); }
 export function reduce_0_360(angle: number) { return ((angle % 360) + 360) % 360; }
 
+export function deadband(input: number, width: number){
+    if (Math.abs(input) < width) { return 0; }
+    return input;
+}
+
 export function loadImage(src: string) {
     var img = new Image();
     img.src = src;
