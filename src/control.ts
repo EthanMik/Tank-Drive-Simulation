@@ -14,7 +14,7 @@ document.addEventListener('keyup', (event) => {
     keysHandled[event.key] = false;
 });
 
-let empty_field = loadImage("/empty_field.png");
+let empty_field = loadImage("./empty_field.png");
     
 export function draw_field_control() {        
     ctx.drawImage(empty_field, 0, 0, canvas.width, canvas.height);
@@ -23,12 +23,17 @@ export function draw_field_control() {
 export function control(robot: Robot, dt: number) {
     let throttle = 0;
     let turn = 0;
+    let accel = 0;
 
     if (keysPressed['w']) throttle += 1;
     if (keysPressed['s']) throttle -= 1;
     if (keysPressed['d']) turn += .5;
     if (keysPressed['a']) turn -= .5;
 
+    if (keysPressed['q'])  accel = -1;
+    if (keysPressed['e'])  accel = 1;
+
+    robot.maxAccel += accel;
 
     const leftCmd = throttle + turn;
     const rightCmd = throttle - turn;

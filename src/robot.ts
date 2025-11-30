@@ -14,7 +14,7 @@ export class Robot {
 
     private vL: number = 0;
     private vR: number = 0;
-    private maxAccel: number;
+    public maxAccel: number;
 
     constructor(width: number, height: number, maxSpeed: number, trackWidth: number, maxAccel: number) {
         this.width = width;
@@ -97,6 +97,7 @@ export class Robot {
 
         ctx.fillText(`vL: ${this.vL.toFixed(2)}`, 20, 95);
         ctx.fillText(`vR: ${this.vR.toFixed(2)}`, 20, 120);
+        ctx.fillText(`a: ${this.maxAccel.toFixed(2)}`, 20, 145);
         ctx.restore();
     }
 
