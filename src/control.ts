@@ -14,7 +14,7 @@ document.addEventListener('keyup', (event) => {
     keysHandled[event.key] = false;
 });
 
-let empty_field = loadImage("./empty_field.png");
+let empty_field = loadImage("/empty_field.png");
     
 export function draw_field_control() {        
     ctx.drawImage(empty_field, 0, 0, canvas.width, canvas.height);
