@@ -6,41 +6,67 @@ export class Robot {
     public height: number;
     public maxSpeed: number;
     public trackWidth: number;
-    private x: number = 0;
+
+    private x: number = 0; 
     private y: number = 0;
     private angle: number = 0;
     private color: string;
 
-    private dt: number = 0;
+    private vL: number = 0;
+    private vR: number = 0;
+    private maxAccel: number;
 
-    constructor(width: number, height: number, maxSpeed: number, trackWidth: number) {
+    constructor(width: number, height: number, maxSpeed: number, trackWidth: number, maxAccel: number) {
         this.width = width;
         this.height = height;
         this.maxSpeed = maxSpeed;
         this.trackWidth = trackWidth;
-        this.color = '#969696ff'
+        this.maxAccel = maxAccel;
+        this.color = '#969696ff';
     }
 
-    private set_x(x: number) { (this.x = clamp(x, -72 + this.width / 2, 72 - this.width / 2)); }
-    private set_y(y: number) { this.y =  clamp(y, -72 + this.height / 2, 72 - this.height / 2); }
-    private set_angle(angle: number) { this.angle = ((angle % 360) + 360) % 360; }
+    private set_x(x: number) { 
+        this.x = clamp(x, -72 + this.width / 2, 72 - this.width / 2); 
+    }
+
+    private set_y(y: number) { 
+        this.y = clamp(y, -72 + this.height / 2, 72 - this.height / 2); 
+    }
+
+    private set_angle(angle: number) { 
+        this.angle = ((angle % 360) + 360) % 360; 
+    }
 
     get_x() { return this.x; }
-    get_y() { return this.y }
+    get_y() { return this.y; }
     get_angle() { return this.angle; }
 
-    tankDrive(leftCmd: number, rightCmd: number) {
-        const b = this.trackWidth;
-        const v_max = this.maxSpeed;
+    private moveTowards(current: number, target: number, maxDelta: number): number {
+        const diff = target - current;
+        if (Math.abs(diff) <= maxDelta) return target;
+        return current + Math.sign(diff) * maxDelta;
+    }
 
-        const left = clamp(leftCmd, -1, 1);
+    tankDrive(leftCmd: number, rightCmd: number, dt: number) {
+        const b_in = this.trackWidth;
+        const v_max_ft = this.maxSpeed;
+
+        const left  = clamp(leftCmd,  -1, 1);
         const right = clamp(rightCmd, -1, 1);
 
-        const vL = left * v_max;
-        const vR = right * v_max;
+        const targetVL_ft = left  * v_max_ft;
+        const targetVR_ft = right * v_max_ft;
 
-        const v = (vR + vL) / 2;
-        const ω = (vL - vR) / b;
+        const dvMax_ft = this.maxAccel * dt;
+
+        this.vL = this.moveTowards(this.vL, targetVL_ft, dvMax_ft);
+        this.vR = this.moveTowards(this.vR, targetVR_ft, dvMax_ft);
+
+        const vL_in = this.vL * 12;
+        const vR_in = this.vR * 12;
+
+        const v_in  = (vR_in + vL_in) / 2;
+        const ω     = (vL_in - vR_in) / b_in;
 
         const θdeg = this.get_angle();
         const θ = to_rad(θdeg);
@@ -48,12 +74,11 @@ export class Robot {
         const forwardX = Math.sin(θ);
         const forwardY = Math.cos(θ);
 
-        const xNew = this.get_x() + v * forwardX * this.dt;
-        const yNew = this.get_y() + v * forwardY * this.dt;
+        const xNew = this.get_x() + v_in * forwardX * dt;
+        const yNew = this.get_y() + v_in * forwardY * dt;
 
-        const θNew = θ + ω * this.dt;
+        const θNew = θ + ω * dt;
         let θdegNew = to_deg(θNew);
-
         θdegNew = reduce_0_360(θdegNew);
 
         this.set_x(xNew);
@@ -69,6 +94,9 @@ export class Robot {
         ctx.fillText(`θ: ${this.get_angle().toFixed(2)}`, 20, 20);
         ctx.fillText(`X: ${this.get_x().toFixed(2)}`, 20, 45);
         ctx.fillText(`Y: ${this.get_y().toFixed(2)}`, 20, 70);
+
+        ctx.fillText(`vL: ${this.vL.toFixed(2)}`, 20, 95);
+        ctx.fillText(`vR: ${this.vR.toFixed(2)}`, 20, 120);
         ctx.restore();
     }
 
@@ -78,7 +106,12 @@ export class Robot {
         ctx.translate(to_pxx(this.x), to_pxy(this.y));
         ctx.rotate(to_inertial_rad(this.angle));
         ctx.fillStyle = this.color;
-        ctx.fillRect(-to_px(this.width) / 2, -to_px(this.height) / 2, to_px(this.width), to_px(this.height));
+        ctx.fillRect(
+            -to_px(this.width) / 2,
+            -to_px(this.height) / 2,
+            to_px(this.width),
+            to_px(this.height)
+        );
 
         ctx.beginPath();
         ctx.moveTo(0, 0);
@@ -90,9 +123,8 @@ export class Robot {
         ctx.restore();
     }
 
-    render(dt: number) {
+    render() {
         this.draw_chassis();
         this.draw_odom_data();
-        this.dt = dt;
     }
 }

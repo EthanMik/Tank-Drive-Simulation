@@ -20,18 +20,18 @@ export function draw_field_control() {
     ctx.drawImage(empty_field, 0, 0, canvas.width, canvas.height);
 }
 
-export function control(robot: Robot) {
+export function control(robot: Robot, dt: number) {
     let throttle = 0;
     let turn = 0;
 
     if (keysPressed['w']) throttle += 1;
     if (keysPressed['s']) throttle -= 1;
-    if (keysPressed['d']) turn += .05;
-    if (keysPressed['a']) turn -= .05;
+    if (keysPressed['d']) turn += .5;
+    if (keysPressed['a']) turn -= .5;
 
 
     const leftCmd = throttle + turn;
     const rightCmd = throttle - turn;
 
-    robot.tankDrive(leftCmd, rightCmd);
+    robot.tankDrive(leftCmd, rightCmd, dt);
 }

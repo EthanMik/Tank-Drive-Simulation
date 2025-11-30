@@ -2,16 +2,17 @@ import { Robot } from './robot.ts'
 import { control, draw_field_control } from './control.ts'
 
 let robot = new Robot(
-    14, // Width
-    14, // Height
-    25, // Speed
-    .4  // Track Radius
+    14, // Width (inches)
+    14, // Height (inches)
+    6, // Speed (ft/s)
+    16,  // Track Radius (inches)
+    30 // Max Accel (ft/s^2)
 );
 
 function update(dt: number) {
     draw_field_control();
-    robot.render(dt);
-    control(robot);
+    robot.render();
+    control(robot, dt);
 }
 
 let lastFrameTime = 0;
