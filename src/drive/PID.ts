@@ -1,14 +1,4 @@
-export interface PIDConstants {
-    maxSpeed: number;
-    minSpeed: number;
-    kp: number, 
-    ki: number, 
-    kd: number, 
-    starti: number, 
-    settleTime: number, 
-    settleError: number, 
-    timeout: number
-}
+import type { PIDConstants } from "./PIDconstants";
 
 export class PID {
     public kp: number;
@@ -19,6 +9,9 @@ export class PID {
     public settleTime: number;
     public settleError: number;
     public timeout: number;
+
+    public maxSpeed: number = 1;
+    public minSpeed: number = 0;
 
     private acculatedError = 0;
     private previousError = 0;
@@ -48,6 +41,9 @@ export class PID {
             this.settleTime = kPID.settleTime;
             this.settleError = kPID.settleError;
             this.timeout = kPID.timeout;
+
+            this.maxSpeed = kPID.maxSpeed;
+            this.minSpeed = kPID.minSpeed;
        }
     }
 
@@ -83,5 +79,12 @@ export class PID {
             return true;
         }
         return false;
+    }
+
+    public reset() {
+        this.previousError = 0;
+        this.acculatedError = 0;
+        this.timeSpentRunning = 0;
+        this.timeSpentSettled = 0;
     }
 }

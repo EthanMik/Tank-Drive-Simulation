@@ -18,7 +18,10 @@ export class Robot {
     private vR: number = 0;
     public maxAccel: number;
 
-    constructor(width: number, height: number, maxSpeed: number, trackWidth: number, maxAccel: number) {
+    constructor(startX: number, startY: number, startAngle: number, width: number, height: number, maxSpeed: number, trackWidth: number, maxAccel: number) {
+        this.x = startX;
+        this.y = startY;
+        this.angle = startAngle;
         this.width = width;
         this.height = height;
         this.maxSpeed = maxSpeed;

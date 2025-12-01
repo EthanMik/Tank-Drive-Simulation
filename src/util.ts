@@ -33,7 +33,7 @@ export function is_line_settled(desired_X: number, desired_Y: number, desired_an
 }
 
 export function left_voltage_scaling(drive_output: number, heading_output: number) {
-    const ratio = Math.max(Math.abs(drive_output + heading_output), Math.abs(drive_output - heading_output)) / 12.0;
+    const ratio = Math.max(Math.abs(drive_output + heading_output), Math.abs(drive_output - heading_output));
     if (ratio > 1) {
         return (drive_output + heading_output) / ratio;
     }
@@ -41,7 +41,7 @@ export function left_voltage_scaling(drive_output: number, heading_output: numbe
 }
 
 export function right_voltage_scaling(drive_output: number, heading_output: number) {
-    const ratio = Math.max(Math.abs(drive_output + heading_output), Math.abs(drive_output - heading_output)) / 12.0;
+    const ratio = Math.max(Math.abs(drive_output + heading_output), Math.abs(drive_output - heading_output));
     if (ratio > 1) {
         return (drive_output - heading_output) / ratio;
     }
@@ -49,10 +49,10 @@ export function right_voltage_scaling(drive_output: number, heading_output: numb
 }
 
 export function clamp_min_voltage(drive_output: number, drive_min_voltage: number) {
-    if(drive_output < 0 && drive_output > -drive_min_voltage) {
+    if (drive_output < 0 && drive_output > -drive_min_voltage) {
         return -drive_min_voltage;
     }
-    if(drive_output > 0 && drive_output < drive_min_voltage) {
+    if (drive_output > 0 && drive_output < drive_min_voltage) {
         return drive_min_voltage;
     }
     return drive_output;
