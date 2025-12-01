@@ -1,3 +1,5 @@
+import { keysHandled, keysPressed } from './control.ts';
+import type { Rectangle } from './field.ts';
 import { scale, canvasWidth_px, kPX, fieldWidth_in } from './globals.ts';
 
 export function to_px(inches: number) { return inches / ((canvasWidth_px / scale) / (fieldWidth_in * scale)) * kPX; }
@@ -19,4 +21,17 @@ export function loadImage(src: string) {
     var img = new Image();
     img.src = src;
     return img;
+}
+
+export function newPress(key: string) {
+    return keysPressed[key] && !keysHandled[key];
+}
+
+export function RectangleRectangleCollision(rect1: Rectangle, rect2: Rectangle): boolean {
+    return !(
+        rect1.x + rect1.w  <= rect2.x ||
+        rect2.x + rect2.w  <= rect1.x ||
+        rect1.y + rect1.h <= rect2.y ||
+        rect2.y + rect2.h <= rect1.y 
+    );
 }

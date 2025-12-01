@@ -1,5 +1,6 @@
 import { to_px, to_pxx, to_pxy, to_inertial_rad, clamp, to_rad, to_deg, reduce_0_360 } from './util.ts';
 import { ctx } from './globals.ts';
+import type { Field } from './field.ts';
 
 export class Robot {
     public width: number;
@@ -11,6 +12,7 @@ export class Robot {
     private y: number = 0;
     private angle: number = 0;
     private color: string;
+    public odomData: boolean = true;
 
     private vL: number = 0;
     private vR: number = 0;
@@ -47,7 +49,7 @@ export class Robot {
         return current + Math.sign(diff) * maxDelta;
     }
 
-    tankDrive(leftCmd: number, rightCmd: number, dt: number) {
+    tankDrive(leftCmd: number, rightCmd: number, field: Field, dt: number) {
         const b_in = this.trackWidth;
         const v_max_ft = this.maxSpeed;
 
@@ -65,8 +67,9 @@ export class Robot {
         const vL_in = this.vL * 12;
         const vR_in = this.vR * 12;
 
-        const v_in  = (vR_in + vL_in) / 2;
-        const ω     = (vL_in - vR_in) / b_in;
+        let v_in  = (vR_in + vL_in) / 2;        
+
+        const ω = (vL_in - vR_in) / b_in;
 
         const θdeg = this.get_angle();
         const θ = to_rad(θdeg);
@@ -74,8 +77,31 @@ export class Robot {
         const forwardX = Math.sin(θ);
         const forwardY = Math.cos(θ);
 
-        const xNew = this.get_x() + v_in * forwardX * dt;
-        const yNew = this.get_y() + v_in * forwardY * dt;
+        const bbox = (x: number, y: number) => ({
+            x: to_pxx(x - this.width / 2), 
+            y: to_pxy(y + this.height / 2), 
+            w: to_px(this.width), 
+            h: to_px(this.height)
+        });     
+
+        let xNew = this.get_x();
+        let yNew = this.get_y();
+
+        let xCand = this.get_x() + v_in * forwardX * dt;
+        let yCand = this.get_y() + v_in * forwardY * dt;
+
+        if (!field.collision(bbox(xCand, yCand))) {
+            xNew = xCand;
+            yNew = yCand;
+        } else {
+            if (!field.collision(bbox(xCand, this.get_y()))) {
+                xNew = xCand;
+            }
+
+            if (!field.collision(bbox(this.get_x(), yCand))) {
+                yNew = yCand;
+            }
+        }
 
         const θNew = θ + ω * dt;
         let θdegNew = to_deg(θNew);
@@ -126,6 +152,6 @@ export class Robot {
 
     render() {
         this.draw_chassis();
-        this.draw_odom_data();
+        if (this.odomData) this.draw_odom_data();
     }
 }

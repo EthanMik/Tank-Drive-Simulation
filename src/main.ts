@@ -1,5 +1,6 @@
 import { Robot } from './robot.ts'
-import { control, draw_field_control } from './control.ts'
+import { Field } from './field.ts';
+import { fieldControl, menuButtons, splitArcade } from './control.ts';
 
 let robot = new Robot(
     14, // Width (inches)
@@ -9,10 +10,20 @@ let robot = new Robot(
     30 // Max Accel (ft/s^2)
 );
 
+let fields = [
+    new Field("./push_back_skills.png", [
+        { x: 195, y: 462, w: 190, h: 25 },
+        { x: 195, y: 88, w: 190, h: 25 },
+    ]),
+    new Field("./empty_field.png"),
+    new Field("./high_stakes_skills.png"),
+]
+
 function update(dt: number) {
-    draw_field_control();
+    const field = fieldControl(fields);
+    menuButtons(robot); 
     robot.render();
-    control(robot, dt);
+    splitArcade(robot, field, dt);
 }
 
 let lastFrameTime = 0;
