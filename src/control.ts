@@ -1,6 +1,7 @@
 import { deadband, newPress } from './util.ts';
 import type { Robot } from './robot.ts';
 import type { Field } from './field.ts';
+import type { Path } from './drive/trajectory.ts';
 
 let gamepadIdx: number | null = null;
 
@@ -38,6 +39,16 @@ document.addEventListener('keyup', (event) => {
 });
 
 const DEADZONE = 0.15;
+
+let idx = 0;
+export function slider(robot: Robot, path: Path) {
+    if (idx >= path.trajectory.length) return;
+
+    const pose = path.trajectory[idx];
+    robot.setPose(pose.x, pose.y, pose.angle)
+    if (keysPressed['n']) idx-=2;
+    if (keysPressed['m']) idx+=2;
+}
 
 export function menuButtons(robot: Robot) {
     let accel = 0;

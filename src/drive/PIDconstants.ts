@@ -17,9 +17,9 @@ export const kturnPID: PIDConstants = {
     ki: .03,
     kd: 3,
     starti: 15,
-    settleTime: 100,
+    settleTime: 300,
     settleError: 1,
-    timeout: 3000
+    timeout: 0
 }
 
 export const kDrivePID: PIDConstants = {

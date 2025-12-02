@@ -71,7 +71,6 @@ export class PID {
     }
 
     public isSettled(): boolean {
-        console.log(this.timeSpentRunning)
         if (this.timeSpentRunning > this.timeout && this.timeout != 0) {
             return true;
         }

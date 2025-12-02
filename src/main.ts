@@ -1,9 +1,10 @@
 import { Robot } from './robot.ts';
 import { Field } from './field.ts';
-import { fieldControl, menuButtons } from './control.ts';
+import { fieldControl, menuButtons, slider } from './control.ts';
 import { PID } from './drive/PID.ts';
-import { driveDistance, driveToPoint, turnToAngle } from './driveMotions.ts';
+import { driveDistance, driveToPoint, turnToAngle } from './drive/driveMotions.ts';
 import { kOdomDrivePID, kOdomHeadingPID, kturnPID } from './drive/PIDconstants.ts';
+import { precomputePath } from './drive/trajectory.ts';
 
 let robot = new Robot(
     -55, // Start x
@@ -29,29 +30,27 @@ const turnPID = new PID(kturnPID);
 const drivePID = new PID(kOdomDrivePID);
 const headingPID = new PID(kOdomHeadingPID);
 
-let autoIdx = 0;
-
 let auton = [
-(field: Field, dt: number):boolean =>{return driveToPoint(robot, field, dt, -23, -24, drivePID, headingPID);},
-(field: Field, dt: number):boolean =>{return driveToPoint(robot, field, dt, -11, -38, drivePID, headingPID);},
-(field: Field, dt: number):boolean =>{return driveToPoint(robot, field, dt, -26, -27, drivePID, headingPID);},
-(field: Field, dt: number):boolean =>{return turnToAngle(robot, field, dt, -139, turnPID);},
-(field: Field, dt: number):boolean =>{return driveToPoint(robot, field, dt, -42, -46, drivePID, headingPID);},
-(field: Field, dt: number):boolean =>{return turnToAngle(robot, field, dt, 270, turnPID);},
-(field: Field, dt: number):boolean =>{return driveDistance(robot, field, dt, 15, robot.get_angle(), drivePID, headingPID);},
-(field: Field, dt: number):boolean =>{return driveDistance(robot, field, dt, -22, robot.get_angle(), drivePID, headingPID);},
+    (robot: Robot, field: Field, dt: number):boolean =>{return driveToPoint(robot, field, dt, -23, -24, drivePID, headingPID);},
+    (robot: Robot, field: Field, dt: number):boolean =>{return driveToPoint(robot, field, dt, -11, -38, drivePID, headingPID);},
+    (robot: Robot, field: Field, dt: number):boolean =>{return driveToPoint(robot, field, dt, -26, -27, drivePID, headingPID);},
+    (robot: Robot, field: Field, dt: number):boolean =>{return turnToAngle(robot, field, dt, -139, turnPID);},
+    (robot: Robot, field: Field, dt: number):boolean =>{return driveToPoint(robot, field, dt, -42, -46, drivePID, headingPID);},
+    (robot: Robot, field: Field, dt: number):boolean =>{return turnToAngle(robot, field, dt, 270, turnPID);},
+    (robot: Robot, field: Field, dt: number):boolean =>{return driveDistance(robot, field, dt, 15, robot.get_angle(), drivePID, headingPID);},
+    (robot: Robot, field: Field, dt: number):boolean =>{return driveDistance(robot, field, dt, -22, robot.get_angle(), drivePID, headingPID);},
 ];
 
+const path = precomputePath(robot, auton, fields[0])
+
+console.log(path.trajectory.length)
 
 function update(dt: number) {
-    const field = fieldControl(fields);
+    menuButtons(robot)
+    fieldControl(fields);
+    slider(robot, path);
+    // robot.pathFollow(path, dt)
 
-    if (autoIdx < auton.length) {
-        const done = auton[autoIdx](field, dt);
-        if (done) autoIdx++;
-    }
-
-    menuButtons(robot); 
     robot.render();
 }
 
