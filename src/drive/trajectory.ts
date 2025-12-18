@@ -1,5 +1,5 @@
 import type { Field } from "../field";
-import { Robot } from "../robot";
+import type { TankDriveRobot } from "../tankDriveRobot";
 
 export interface Snapshot {
     t: number,
@@ -16,8 +16,8 @@ export interface Path {
 export let trajectory: Snapshot[] = [];
 
 export function precomputePath(
-    robot: Robot,
-    auton: ((robot: Robot, field: Field, dt: number) => boolean)[], 
+    robot: TankDriveRobot,
+    auton: ((robot: TankDriveRobot, field: Field, dt: number) => boolean)[], 
     field: Field
 ): Path 
 {   

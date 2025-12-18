@@ -1,9 +1,8 @@
 import { to_px, to_pxx, to_pxy, to_inertial_rad, clamp, to_rad, to_deg, reduce_0_360 } from './util.ts';
 import { ctx } from './globals.ts';
 import type { Field } from './field.ts';
-import type { Path } from './drive/trajectory.ts';
 
-export class Robot {
+export class TankDriveRobot {
     public width: number;
     public height: number;
     public maxSpeed: number;
@@ -13,24 +12,24 @@ export class Robot {
     private y: number = 0;
     private angle: number = 0;
     private color: string;
-    private pathTime: number = 0;
     public odomData: boolean = true;
 
     private vL: number = 0;
     private vR: number = 0;
     public maxAccel: number;
+    public maxDecel: number;
 
-
-    constructor(startX: number, startY: number, startAngle: number, width: number, height: number, maxSpeed: number, trackWidth: number, maxAccel: number) {
-        this.x = startX;
-        this.y = startY;
-        this.angle = startAngle;
+    constructor(x: number, y: number, angle: number, width: number, height: number, maxSpeed: number, trackWidth: number, maxAccel: number, maxDecel: number) {
+        this.x = x;
+        this.y = y;
+        this.angle = angle;
         this.width = width;
         this.height = height;
         this.maxSpeed = maxSpeed;
         this.trackWidth = trackWidth;
         this.maxAccel = maxAccel;
-        this.color = '#969696ff';
+        this.maxDecel = maxDecel
+        this.color = '#969696c4';
     }
 
     private set_x(x: number) { 
@@ -49,8 +48,12 @@ export class Robot {
     get_y() { return this.y; }
     get_angle() { return this.angle; }
 
-    private moveTowards(current: number, target: number, maxDelta: number): number {
+    private moveTowards(current: number, target: number, dt: number): number {
         const diff = target - current;
+
+        let isAccel = Math.abs(target) > Math.abs(current);
+        let maxDelta = (isAccel ? this.maxAccel : this.maxDecel) * dt;
+
         if (Math.abs(diff) <= maxDelta) return target;
         return current + Math.sign(diff) * maxDelta;
     }
@@ -65,10 +68,10 @@ export class Robot {
         const targetVL_ft = left  * v_max_ft;
         const targetVR_ft = right * v_max_ft;
 
-        const dvMax_ft = this.maxAccel * dt;
+        // const dvMax_ft = this.maxAccel * dt;
 
-        this.vL = this.moveTowards(this.vL, targetVL_ft, dvMax_ft);
-        this.vR = this.moveTowards(this.vR, targetVR_ft, dvMax_ft);
+        this.vL = this.moveTowards(this.vL, targetVL_ft, dt);
+        this.vR = this.moveTowards(this.vR, targetVR_ft, dt);
 
         const vL_in = this.vL * 12;
         const vR_in = this.vR * 12;
@@ -118,31 +121,10 @@ export class Robot {
         this.set_angle(θdegNew);
     }
 
-    public setPose(x: number, y: number, angle: number) {
-        this.x = x;
-        this.y = y;
-        this.angle = angle;
-    }
-
-    public pathFollow(path: Path, dt: number) {
-        if (!path.trajectory.length) return;
-
-        this.pathTime += dt;
-        if (this.pathTime > path.totalTime) {
-            this.pathTime = path.totalTime;
-        }
-
-        const normalized = this.pathTime / path.totalTime;
-        const idx = Math.floor(normalized * (path.trajectory.length - 1));
-        const snap = path.trajectory[idx];
-
-        this.set_x(snap.x);
-        this.set_y(snap.y);
-        this.set_angle(snap.angle);
-    }
-
     private draw_odom_data() {
-        ctx.save();
+        if (!this.odomData) return;
+
+        ctx .save();
         ctx.font = '20px Calibri';
         ctx.fillStyle = 'white';
         ctx.textBaseline = 'top';
@@ -152,7 +134,9 @@ export class Robot {
 
         ctx.fillText(`vL: ${this.vL.toFixed(2)}`, 20, 95);
         ctx.fillText(`vR: ${this.vR.toFixed(2)}`, 20, 120);
-        ctx.fillText(`a: ${this.maxAccel.toFixed(2)}`, 20, 145);
+        ctx.fillText(`Velo: ${this.maxSpeed.toFixed(2)}`, 20, 120+25);
+        ctx.fillText(`Accel: ${this.maxAccel.toFixed(2)}`, 20, 120+50);
+        ctx.fillText(`Decel: ${this.maxDecel.toFixed(2)}`, 20, 120+75);
         ctx.restore();
     }
 

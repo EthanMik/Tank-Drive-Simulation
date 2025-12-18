@@ -1,9 +1,9 @@
 import { PID } from "./PID";
 import type { Field } from "../field";
-import type { Robot } from "../robot";
 import { clamp, clamp_min_voltage, is_line_settled, left_voltage_scaling, reduce_negative_180_to_180, reduce_negative_90_to_90, right_voltage_scaling, to_deg, to_rad } from "../util";
+import type { TankDriveRobot } from "../tankDriveRobot";
 
-export function turnToAngle(robot: Robot, field: Field, dt: number, angle: number, turnPID: PID) {
+export function turnToAngle(robot: TankDriveRobot, field: Field, dt: number, angle: number, turnPID: PID) {
     const error = reduce_negative_180_to_180(angle - robot.get_angle());
     
     if (turnPID.isSettled()) {
@@ -21,7 +21,7 @@ export function turnToAngle(robot: Robot, field: Field, dt: number, angle: numbe
 
 let driveDistanceStartPos: number | null = null;
 
-export function driveDistance(robot: Robot, field: Field, dt: number, distance: number, heading: number, drivePID: PID, headingPID: PID) {
+export function driveDistance(robot: TankDriveRobot, field: Field, dt: number, distance: number, heading: number, drivePID: PID, headingPID: PID) {
     if (driveDistanceStartPos === null) {
         driveDistanceStartPos = Math.hypot(robot.get_x(), robot.get_y());
     }
@@ -54,7 +54,7 @@ export function driveDistance(robot: Robot, field: Field, dt: number, distance: 
 
 let prev_line_settled = false;
 
-export function driveToPoint(robot: Robot, field: Field, dt: number, x: number, y: number, drivePID: PID, headingPID: PID) {
+export function driveToPoint(robot: TankDriveRobot, field: Field, dt: number, x: number, y: number, drivePID: PID, headingPID: PID) {
     let heading = to_deg(Math.atan2(x - robot.get_x(), y - robot.get_y()));
     let drive_error = Math.hypot(x - robot.get_x(), y - robot.get_y());
 
