@@ -1,7 +1,6 @@
-import { to_px, to_pxx, to_pxy, to_inertial_rad, clamp, to_rad, to_deg, reduce_0_360 } from './util.ts';
+import { to_px, to_pxx, to_pxy, clamp, to_rad, to_deg, reduce_0_360 } from './util.ts';
 import { ctx } from './globals.ts';
 import type { Field } from './field.ts';
-import type { Path } from './drive/trajectory.ts';
 
 export class mecanumDriveRobot {
     public width: number;
@@ -179,7 +178,7 @@ export class mecanumDriveRobot {
         ctx.save();
 
         ctx.translate(to_pxx(this.x), to_pxy(this.y));
-        ctx.rotate(to_inertial_rad(this.angle));
+        // ctx.rotate(to_inertial_rad(this.angle));
         ctx.fillStyle = this.color;
         ctx.fillRect(
             -to_px(this.width) / 2,
